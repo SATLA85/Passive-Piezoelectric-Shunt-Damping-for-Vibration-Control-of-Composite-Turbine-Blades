@@ -1,0 +1,56 @@
+!*AFUN, DEG  
+FreQ = 137
+PI = 3.14
+NODDis =2130
+!Damping
+ALPHAD,0
+BETAD,0.00030
+
+Tstep=0.001
+Tstop=0.1
+Tres=0.001
+Load =1
+
+/SOLU 
+
+*CFOPEN,strcat(chrval(shunt ),'SENSACTBlade'),txt
+
+ANTYPE,4
+TRNOPT,FULL,,DAMP 
+LUMPM,0 
+OUTRES,ALL,ALL
+
+DELTIM,Tres			! Specifies the time step sizes
+TINTP,,0.25,0.5,0.5
+KBC,1				! Ramped load step
+TIME,Tstep			! Sets time to Tstep seconds
+!F,2143,FZ,Load   
+accelx=0.0
+accely=0.0
+accelz=100
+ACEL,accelx,accely,accelz
+KBC,1				! Ramped load step
+SOLVE
+!FDELE,2143,ALL  		! Delete the load at the end
+DDELE, all, accz
+*DO,t,2*Tstep,Tstop,Tstep
+	TIME,t                   ! Sets time to Tstop second
+
+ 
+!Load=0.1*sin(2*PI*FreQ*t)  
+ !F,2143,FZ,Load           
+
+
+
+	SOLVE
+       *get,Ele,NODE,SENTOP,VOLT
+       *get,Dis,NODE,2143,U,Z
+	*VWRITE,t,Ele,Load,Dis 
+	%0.0e,%0.0f,%0.0f,%0.0f
+DDELE,SENTOP,VOLT               !DELETE  SENSORS voltage 
+*ENDDO
+
+FINISH  
+
+*CFCLOSE
+!*USE,process.mac

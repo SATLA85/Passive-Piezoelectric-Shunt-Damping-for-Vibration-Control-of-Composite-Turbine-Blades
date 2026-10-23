@@ -1,0 +1,21 @@
+/SOLU 
+iter=1
+*CFOPEN,strcat(chrval(iter),'Freq'),txt,' '
+ 
+ANTYPE,MODAL                           ! Modal analysis 
+nmodes =  6
+modopt,LANB,nmodes                     ! Block Lanczos solver 
+mxpand,nmodes,,,yes                    ! Calculate element results and                               
+SOLVE
+*get,f1,mode,1,freq 
+*get,f2,mode,2,freq 
+*get,f3,mode,3,freq 
+*get,f4,mode,4,freq 
+*get,f5,mode,5,freq
+*get,f6,mode,6,freq 
+!lamda=(f1*(l*l)*2*3.14/b)*(dens_b/E_b)**(1/2)
+*VWRITE,f1,f2,f3,f4,f5,f6
+%0.0f ,%0.0f,%0.0f, %0.0f,%0.0f, %0.0f
+
+*cfclos
+FINISH

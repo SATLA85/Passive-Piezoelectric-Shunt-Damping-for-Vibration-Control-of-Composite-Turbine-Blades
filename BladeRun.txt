@@ -1,0 +1,76 @@
+% MATLAB Equivalent of BladeRun.py
+
+PL = [0, 1];
+
+%% Start The FEM iteration analysis
+for k = 1:length(PL)
+    % Write parameter file
+    fileID = fopen('Iter_param_Frequ.inp', 'w+');
+    fprintf(fileID, 'shunt=%e\n', PL(k));
+    fclose(fileID);
+    
+    % ANSYS command setup
+    ansysExe = '"C:\Program Files\ANSYS Inc\v201\ansys\bin\winx64\ANSYS201.exe"';
+    inputFile = 'D:\Berlin_Conf\Blade_Sunt.txt.txt';
+    outputFile = 'D:\Berlin_Conf\Blade_out.txt';
+    
+    cmd = sprintf('%s -b -p ANSYS -i "%s" -o "%s"', ansysExe, inputFile, outputFile);
+    
+    % Run ANSYS via system command
+    [status, cmdout] = system(cmd);
+end
+
+%% First Plot: Harmonic Analysis Results
+Labels = {'Without Control', 'With Control'};
+cl = {'--', '-'};   % Line styles: dashed, solid
+cll = {'r', 'k'};   % Colors: red, black
+MRK = {'none', 'o'}; % Markers: none, circle
+
+figure;
+hold on;
+for k = 1:length(PL)
+    % File names correspond to 0results_Harmonic.txt and 1results_Harmonic.txt
+    filename = sprintf('%dresults_Harmonic.txt', k-1);
+    Y = readmatrix(filename); % Reads comma-delimited data
+    
+    xData = 1:150;
+    yData = abs(Y(:, 2)); % Python index 1 is MATLAB index 2
+    
+    if k == 1
+        plot(xData, yData, 'Color', cll{k}, 'LineStyle', cl{k}, 'DisplayName', Labels{k});
+    else
+        plot(xData, yData, 'Color', cll{k}, 'LineStyle', cl{k}, 'Marker', MRK{k}, 'DisplayName', Labels{k});
+    end
+end
+
+legend('Location', 'best');
+set(gca, 'FontSize', 20);
+xlabel('Frequency (Hz)');
+ylabel('Amplitude (dB)');
+xlim([250, 300]);
+hold off;
+
+%% Second Plot: Sensor/Actuator Data
+figure;
+hold on;
+for k = 1:length(PL)
+    % File names correspond to 0SENSACTBlade.txt and 1SENSACTBlade.txt
+    filename = sprintf('%dSENSACTBlade.txt', k-1);
+    Y = readmatrix(filename);
+    
+    xData = Y(:, 1);
+    yData = Y(:, 4); % Python index 3 is MATLAB index 4
+    
+    if k == 1
+        plot(xData, yData, 'Color', cll{k}, 'LineStyle', cl{k}, 'DisplayName', Labels{k});
+    else
+        plot(xData, yData, 'Color', cll{k}, 'LineStyle', cl{k}, 'Marker', MRK{k}, 'DisplayName', Labels{k});
+    end
+end
+
+legend('Location', 'best');
+set(gca, 'FontSize', 20);
+xlabel('Time (s)');
+ylabel('Amplitude (mm)');
+xlim([250, 300]);
+hold off;

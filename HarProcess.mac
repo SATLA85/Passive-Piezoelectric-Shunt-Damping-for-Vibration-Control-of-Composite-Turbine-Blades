@@ -1,0 +1,12 @@
+/POST1
+*CFOPEN,strcat(chrval(shunt),'results_Harmonic'),txt,' '
+
+*DO,i,1,FreRange
+  SET,next
+  *get,Ele,NODE,SENTOP,VOLT
+  *get,Dis,NODE,2143,U,Z
+   *VWRITE,Ele,Dis
+   %0.0f,%0.0f
+
+*ENDDO ! i
+*cfclos 

@@ -1,0 +1,24 @@
+	 
+kp = 100
+kd = -1.5
+ki = 50000
+dzp   = 0
+integ = 0
+va    = 0
+*get,Ele,NODE,SENTOP,VOLT
+!*GET,Dis,NODE,SDIS,UZ            !GET DISPLACEMENTS
+
+ 
+*set,x,Ele 
+*set,integ,integ+x*Tstep                   !INTEGRAL   PART ACT1
+*set,diff,(x-dzp)/Tstep                 !DIRIVATIVE PART ACT1
+*set,va,kp*x+ki*integ+kd*diff 
+
+d,ANTOP,VOLT,-va      ! VOLTAGE ON ACTUATOR1
+
+
+*set,dzp,x 
+
+
+
+

@@ -1,0 +1,301 @@
+Finish
+/Clear,all
+/BATCH
+/CONFIG,NRES,50000 ! Maximum substep is 50000
+!/input,menust,tmp,'',,,,,,,,,,,,,,,,1
+/GRA,POWER
+/GST,ON
+/PLO,INFO,3
+/GRO,CURL,ON
+/CWD,'D:\Berlin_Conf\Codes' 
+/RGB,INDEX,100,100,100,0
+/RGB,INDEX,0,0,0,15
+!*USE,Iter_param_Frequ.inp
+shunt = 1     ! 1 : Shunt On
+              ! 0 : Shunt Off
+FreRange = 150
+*dim,F,array,6   ! Array to store natural frequencies
+*dim,L,array,6   ! Array to store inductor values
+*dim,R,array,6   ! Array to store resistor values
+*set,Fmode,1     ! Index of the modal to be controlled
+Cpiez = 31.14E-9 ! Capacitor of PZT
+F(1) = 134.26    ! First modal frequency
+F(2) = 279.78    ! Second modal frequency
+F(3) = 324.152   ! Third modal frequency
+F(4) = 546.799   ! Fourth modal frequency
+F(5) = 834.393   ! Fifth modal frequency
+
+L(1) = 1/(((2*3.14*F(1))**2)*Cpiez)    ! Inductor value for F(1)
+L(2) = 1/(((2*3.14*F(2))**2)*Cpiez)    ! Inductor value for F(2)
+L(3) = 7.27         ! Inductor value for F(3)
+L(4) = 2.58         ! Inductor value for F(4)
+L(5) = 1.11         ! Inductor value for F(5)
+R(1) = 2500!55000   ! Resistor value for F(1)
+R(2) = 10000        ! Resistor value for F(2)
+R(3) = 5E6          ! Resistor value for F(3)
+R(4) = 4E5          ! Resistor value for F(4)
+R(5) = 18E4         ! Resistor value for F(5) 
+
+
+~PARAIN,Blade_SensorActuator,x_t,,all,0,0      ! Access blade-model.x_t file built in Solidworks 
+
+
+Load  = 10
+Tstep = 0.001
+Tstop = 3
+Tres  = 0.001
+
+!DMPRAT,0.03
+ele_numb_s=5
+ele_numb_b=15
+!!******************************************************
+ET,2,SOLID95          ! 3-D Blade element
+ET,1,Solid226,1001   ! 3-D piezoelectric element
+!ET,1,SOLID5,3  
+!Contact elements:
+ET,3,CONTA174
+KEYOPT,3,2,1
+KEYOPT,3,6,0
+KEYOPT,3,7,0
+KEYOPT,3,8,2
+KEYOPT,3,9,1
+KEYOPT,3,11,0
+KEYOPT,3,12,5             ! Keyopt 12 set to 5 is a bonded always condition
+!Target elements:
+ET,4,TARGE170
+!!******************************************************
+! Material property of Blade**************** 
+EX_1=206.0E9                 ! Modulus of elasticity in x-direction (1.3GPA FOR T300)
+EY_1=20.70E9                 ! Modulus of elasticity in y-direction
+EZ_1=20.70E9                 ! Modulus of elasticity in z-direction
+PRXY_1=0.3                   ! Poisson's ratio
+PRYZ_1=0.3                   ! Poisson's ratio
+PRXZ_1=0.3                   ! Poisson's ratio
+GXY_1=8.3E9                  ! Shear modulus of elasticity
+GYZ_1=8.3E9                  ! Shear modulus of elasticity
+GXZ_1=8.3E9
+
+! MATERIAL 1 UN-DAMAGED
+   
+MPTEMP,,,,,,,,  
+MPTEMP,1,0 
+MPDATA,DENS,2,,1540      
+MPDATA,EX,2,,EX_1        
+MPDATA,EY,2,,EY_1 
+MPDATA,EZ,2,,EZ_1  
+MPDATA,PRXY,2,,PRXY_1  
+MPDATA,PRYZ,2,,PRYZ_1 
+MPDATA,PRXZ,2,,PRXZ_1
+MPDATA,GXY,2,,GXY_1 
+MPDATA,GYZ,2,,GYZ_1 
+MPDATA,GXZ,2,,GXZ_1
+!MP, DMPR, 2, 0.02
+!Piezo Properties APC 850******************** 
+!et,1,SOLID5,3                  ! 3-D piezoelectric element
+MP,DENS,1,7800
+MP,PERX,1,1700!1.27e-8               ! PIEZOELECTRIC PERMITTIVITY
+MP,PERY,1,1700!1.27e-8
+MP,PERZ,1,1470!1,1.27e-8               ! PERMITTIVITY (Z DIRECTION)...F/m
+TB,PIEZ,1                       ! DEFINE PIEZELECTRIC COUPLING TABLE 
+
+TBDATA,3,-6.1          ! e31 PIEZOELECTRIC CONSTANT
+TBDATA,6,-6.1          ! e32 PIEZOELECTRIC CONSTANT
+TBDATA,9,12.1          ! e33 PIEZOELECTRIC CONSTANT
+TBDATA,14,11.9         ! e15 PIEZOELECTRIC CONSTANT
+TBDATA,16,11.9         ! e16 PIEZOELECTRIC CONSTANT
+
+TB,ANEL,1                           ! DEFINE STRUCTURAL TABLE/ UPPER MATRIX
+TRIANGLE
+TBDATA,1,39.4e9,12.9e9,8.3e9       !C11, C12, C13 FIRST ROW
+TBDATA,7,39.4e9,8.3e9              !C11=C22, C13, SECOND ROW
+TBDATA,12,9.711e10                 !C33 THIRD  ROW
+TBDATA,16,5.5e9                    !C44 FOURTH ROW
+TBDATA,19,5.5e9                    !C55 FIFTH  ROW
+TBDATA,21,5.5e9                    !C66 SIXTH  ROW
+!!******************************************************
+
+/FACET,FINE 
+VPLOT
+numstr,node,14
+ESIZE,4e-3
+Vsel,s,volum,,5
+VATT,2,,2 
+!!--------------Lines blade shape
+!! Bottom profil
+
+lesize, 89, , , ele_numb_s
+lesize, 85, , , ele_numb_b
+!! Top profil
+
+lesize, 88, , , ele_numb_s
+lesize, 108, , , ele_numb_b
+!!--------------------------------
+
+MSHKEY,0
+MSHAPE,1,3d 
+vmesh,5
+
+Vsel,s,volum,,3
+VATT,2,,2 
+!!--------------Lines Based blade shape
+!! Bottom profil
+
+lesize, 59, , , ele_numb_s
+lesize, 60, , , ele_numb_b
+!! Top profil
+Lsel,s,line,,54
+lesize, 54, , , ele_numb_s
+Lsel,s,line,,55
+lesize, 55, , , ele_numb_b
+!!--------------------------------
+ESIZE,4e-3
+vsweep,3
+
+Vsel,s,volum,,2
+VATT,2,,2 
+!! Top profil Based
+Lsel,s,line,,42
+lesize, 42, , , ele_numb_s
+Lsel,a,line,,39
+lesize, 39, , , ele_numb_b
+ESIZE,4e-3
+vsweep,2
+
+Vsel,s,volum,,1	
+VATT,2,,2 
+!! Bottom profil Based
+Lsel,s,line,,13
+lesize, 13, , , ele_numb_s
+Lsel,a,line,,3	
+lesize, 3, , , ele_numb_b		
+ESIZE,4e-3
+vsweep,1
+
+!!!! Piezo
+Vsel,s,volum,,4				
+VATT,1,,1 
+ESIZE,4e-3
+vsweep,4
+
+!!!! Piezo
+Vsel,s,volum,,6				
+VATT,1,,1 
+ESIZE,8e-3
+vsweep,6
+
+
+!Define Target surface and elements for bonding of PZT to Composite beam:
+!------------------------------------------------------------------------
+! Define bonded contact, (from Principles of Simulating Contact Between Parts using ANSYS)
+
+!Target surface:
+Asel,S,area,,31
+Asel,A,area,,47
+NslA,R,1
+TYPE,4                   ! Selectn element type
+real,3                   ! Sets the element real constant set attribute pointer
+ESLN,S,0                 ! Select those elements attached to the selected nodes
+ESURF,ALL                ! Generate elements overlaid on the free faces of selected nodes
+
+!Contact surface
+Asel,S,area,,37
+Asel,a,area,,41
+type,3
+real,3
+NSLA,S,1
+ESLN,S,0
+ESURF,ALL
+allsel,all
+!--------- End Contatc
+
+!--------- Creat the piezo coupling
+!********* Upper electrode of the piezo
+Asel,s,Area,,50
+Nsla,s,1
+*get,ANTOP,node,0,num,min
+Cp,1,volt,all
+!D,ANTOP,VOLT,0,0
+!********* Lower electrode of the piezo
+Asel,s,Area,,47
+Nsla,s,1
+*get,ANBTTOM,node,0,num,min
+Cp,2,volt,all
+!D,ANBTTOM,VOLT,0,0
+!--------- End piezo coupling
+
+
+!--------- Creat the piezo coupling sensor
+!********* Upper electrode of the piezo
+Asel,s,Area,,34
+Nsla,s,1
+*get,SENTOP,node,0,num,min
+Cp,3,volt,all
+D,SENTOP,VOLT,0,0
+!********* Lower electrode of the piezo
+Asel,s,Area,,31
+Nsla,s,1
+*get,SENBTTOM,node,0,num,min
+Cp,4,volt,all
+D,SENBTTOM,VOLT,0,0
+!--------- End piezo coupling
+
+*IF,shunt,eq,1,then
+     *GET,TOP_ELECTRODE,NODE,,NUM,MIN
+      N,1,-0.03,0.01, 0.03
+      N,2,-0.03,0.01,-0.03
+      ET,10,CIRCU94,1,0                 ! Set up the inductor
+      R,1,L(Fmode)
+      RMOD,1,15,0,0                     ! Subscript of inductor is 0, i.e. L0
+      TYPE,10 $ REAL,1
+      !E,ANBTTOM,2 !ANTOP               ! Serie the inductor to the
+      E,ANBTTOM,ANTOP                   ! Parallel the inductor to the
+ ! electrodes of PZT
+      !E,1,2                             ! Parallel the inductor between
+ ! node 1 and 2
+      ET,11,CIRCU94,0,0                 ! Set up the resistor
+      R,2,R(Fmode)
+      RMOD,2,15,0,0                     ! Subscript of resistor is 0, i.e. R0
+      TYPE,11 $ REAL,2
+      !E,2,ANTOP                        ! Serie the resistor to the
+      E,ANBTTOM,ANTOP                   ! Parallel the inductor to the
+ ! electrodes of PZT
+      !E,1,2                             ! Parallel the resistor between node 1 and 2
+      NSEL,ALL 
+*else
+
+*Endif
+
+allsel,all
+!----------------------
+!Clamp left end of blade
+!----------------------
+nsel,s,loc,x,0,50e-3             ! Clamp left end of bimorph
+d,all,ux,0,,,,uy,uz		 ! Defines DOF constraints, clamp the end
+nsel,all
+
+
+/SOLU
+ANTYPE,HARM                    ! Harmonic analysis
+HARFRQ,0,FreRange,             ! Frequency range of analysis
+NSUBST,FreRange,               ! Number of frequency steps
+KBC,0                          ! Impulse loads
+
+nsel,s,loc,x,0,50e-3             ! Clamp left end of bimorph
+accelx=0.0
+accely=0.0
+accelz=1
+ACEL,accelx,accely,accelz
+
+allsel,all
+
+!F,2143,FZ,-0.1            ! Applying force
+DDELE,SENTOP,VOLT          ! Assigns zero voltage to bottom electrode
+D,ANTOP,VOLT,0.0           ! Assigns zero voltage to bottom electrode
+D,2,VOLT,0.0               ! Assigns zero voltage to node 2
+CNVTOL,F,,,,1E-5           ! Small convergence value for force
+CNVTOL,VOLT                ! Default convergence value for current flow
+Allsel,all
+SOLVE
+FINISH 
+
+*use,HarProcess.mac

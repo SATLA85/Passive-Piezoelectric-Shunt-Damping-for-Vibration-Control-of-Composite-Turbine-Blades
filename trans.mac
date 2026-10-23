@@ -1,0 +1,48 @@
+
+SDIS = 3523
+
+ 
+
+/SOLU 
+
+*CFOPEN,strcat(chrval(cntr),'Results_Blade'),csv
+
+ANTYPE,4
+TRNOPT,FULL,,DAMP 
+LUMPM,0 
+OUTRES,ALL,ALL
+
+DELTIM,Tres			! Specifies the time step sizes
+TINTP,,0.25,0.5,0.5
+
+
+!At the starting point
+TIME,Tstep			! Sets time to Tstep seconds
+F,SDIS,FZ,Load   
+KBC,1				! Ramped load step
+SOLVE
+FDELE,SDIS,ALL  		! Delete the load at the end
+
+*GET,Dis,NODE,SDIS,U,Z 
+
+*DO,t,2*Tstep,Tstop,Tstep
+	TIME,t                  ! Sets time to Tstop second
+
+        *IF,cntr,eq,1,then 				
+
+	*USE,controller.mac
+
+        *else
+
+        *Endif
+
+	SOLVE
+       *GET,Dis,NODE,SDIS,U,Z
+	*VWRITE,t,Dis,va
+	%0.0e,%0.0f,%0.0f 
+*ENDDO
+
+FINISH  
+
+*CFCLOSE
+!*USE,process.mac
