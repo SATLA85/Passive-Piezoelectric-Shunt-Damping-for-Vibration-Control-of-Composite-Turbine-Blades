@@ -1,0 +1,2 @@
+# Passive-Piezoelectric-Shunt-Damping-for-Vibration-Control-of-Composite-Turbine-Blades
+Passive vibration control of turbine blades using piezoelectric RL shunt damping. A coupled finite element model in ANSYS APDL, integrated with MATLAB or Python, evaluates dynamic response and the effects of shunt resistance and inductance on vibration amplitudes, aiming to reduce fatigue and improve structural reliability.
